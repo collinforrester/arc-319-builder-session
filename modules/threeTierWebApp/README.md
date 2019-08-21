@@ -21,3 +21,20 @@ TODO
 3. Deploy `threeTierWebApp-vulnerability.yml`
 4. Review the automated remediation actions that took place
 5. Review and understand the secure architecture diagram to understand best practices and how the AWS tools leveraged in `threeTierWebApp-solution.yml` can help
+
+# Gaps
+## Non technical Gaps
+1. Architecture Digrams
+
+## Technical Gaps
+1. Fix S3 IAM
+2. Double check EC2 remediation as "stop instance" - is there a better way
+3. RDS - same as ec2, only stop instance currently
+4. Overly permissive IAM policies - triggers if it has `*` access, lambda function required.
+5. Unrestricted ssh - just eliminates public access but doesn't let you whitelist , lambda function required
+6. required tags - no auto remediation, probably lambda or something else required
+7. 3 tier - RDS - vulnerability definition missing
+8. 3 tier - IAM - overly permissive roles
+
+# stretch goals
+1. Automated patching

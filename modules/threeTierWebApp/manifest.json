@@ -1,0 +1,469 @@
+{
+  "version": "0.36.0",
+  "artifacts": {
+    "SrcStack": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://unknown-account/unknown-region",
+      "properties": {
+        "templateFile": "SrcStack.template.json"
+      },
+      "metadata": {
+        "/SrcStack/VPC/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCB9E5F0B4",
+            "trace": [
+              "new Vpc (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:821:21)",
+              "new SrcStack (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/lib/src-stack.ts:28:17)",
+              "inquirer.prompt.then (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/bin/cli.ts:31:5)",
+              "process._tickCallback (internal/process/next_tick.js:68:7)"
+            ]
+          }
+        ],
+        "/SrcStack/VPC/PublicSubnet1/Subnet": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPublicSubnet1SubnetB4246D30",
+            "trace": [
+              "new Subnet (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1157:20)",
+              "new PublicSubnet (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1235:5)",
+              "availabilityZones.forEach (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1025:32)",
+              "Array.forEach (<anonymous>)",
+              "Vpc.createSubnetResources (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1007:28)",
+              "Vpc.createSubnets (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1002:12)",
+              "new Vpc (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:845:10)",
+              "new SrcStack (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/lib/src-stack.ts:28:17)",
+              "inquirer.prompt.then (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/bin/cli.ts:31:5)",
+              "process._tickCallback (internal/process/next_tick.js:68:7)"
+            ]
+          }
+        ],
+        "/SrcStack/VPC/PublicSubnet1/RouteTable": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPublicSubnet1RouteTableFEE4B781",
+            "trace": [
+              "new Subnet (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1169:19)",
+              "new PublicSubnet (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1235:5)",
+              "availabilityZones.forEach (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1025:32)",
+              "Array.forEach (<anonymous>)",
+              "Vpc.createSubnetResources (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1007:28)",
+              "Vpc.createSubnets (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1002:12)",
+              "new Vpc (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:845:10)",
+              "new SrcStack (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/lib/src-stack.ts:28:17)",
+              "inquirer.prompt.then (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/bin/cli.ts:31:5)",
+              "process._tickCallback (internal/process/next_tick.js:68:7)"
+            ]
+          }
+        ],
+        "/SrcStack/VPC/PublicSubnet1/RouteTableAssociation": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPublicSubnet1RouteTableAssociation0B0896DC",
+            "trace": [
+              "new Subnet (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1175:5)",
+              "new PublicSubnet (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1235:5)",
+              "availabilityZones.forEach (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1025:32)",
+              "Array.forEach (<anonymous>)",
+              "Vpc.createSubnetResources (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1007:28)",
+              "Vpc.createSubnets (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1002:12)",
+              "new Vpc (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:845:10)",
+              "new SrcStack (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/lib/src-stack.ts:28:17)",
+              "inquirer.prompt.then (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/bin/cli.ts:31:5)",
+              "process._tickCallback (internal/process/next_tick.js:68:7)"
+            ]
+          }
+        ],
+        "/SrcStack/VPC/PublicSubnet1/DefaultRoute": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPublicSubnet1DefaultRoute91CEF279",
+            "trace": [
+              "PublicSubnet.addDefaultInternetRoute (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1191:19)",
+              "Vpc.publicSubnets.forEach.publicSubnet (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:861:22)",
+              "Array.forEach (<anonymous>)",
+              "new Vpc (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:860:46)",
+              "new SrcStack (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/lib/src-stack.ts:28:17)",
+              "inquirer.prompt.then (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/bin/cli.ts:31:5)",
+              "process._tickCallback (internal/process/next_tick.js:68:7)"
+            ]
+          }
+        ],
+        "/SrcStack/VPC/PublicSubnet1/EIP": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPublicSubnet1EIP6AD938E8",
+            "trace": [
+              "PublicSubnet.addNatGateway (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1247:21)",
+              "Vpc.createNatGateways (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:978:27)",
+              "new Vpc (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:865:12)",
+              "new SrcStack (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/lib/src-stack.ts:28:17)",
+              "inquirer.prompt.then (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/bin/cli.ts:31:5)",
+              "process._tickCallback (internal/process/next_tick.js:68:7)"
+            ]
+          }
+        ],
+        "/SrcStack/VPC/PublicSubnet1/NATGateway": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPublicSubnet1NATGatewayE0556630",
+            "trace": [
+              "PublicSubnet.addNatGateway (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1245:17)",
+              "Vpc.createNatGateways (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:978:27)",
+              "new Vpc (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:865:12)",
+              "new SrcStack (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/lib/src-stack.ts:28:17)",
+              "inquirer.prompt.then (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/bin/cli.ts:31:5)",
+              "process._tickCallback (internal/process/next_tick.js:68:7)"
+            ]
+          }
+        ],
+        "/SrcStack/VPC/PublicSubnet2/Subnet": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPublicSubnet2Subnet74179F39",
+            "trace": [
+              "new Subnet (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1157:20)",
+              "new PublicSubnet (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1235:5)",
+              "availabilityZones.forEach (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1025:32)",
+              "Array.forEach (<anonymous>)",
+              "Vpc.createSubnetResources (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1007:28)",
+              "Vpc.createSubnets (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1002:12)",
+              "new Vpc (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:845:10)",
+              "new SrcStack (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/lib/src-stack.ts:28:17)",
+              "inquirer.prompt.then (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/bin/cli.ts:31:5)",
+              "process._tickCallback (internal/process/next_tick.js:68:7)"
+            ]
+          }
+        ],
+        "/SrcStack/VPC/PublicSubnet2/RouteTable": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPublicSubnet2RouteTable6F1A15F1",
+            "trace": [
+              "new Subnet (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1169:19)",
+              "new PublicSubnet (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1235:5)",
+              "availabilityZones.forEach (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1025:32)",
+              "Array.forEach (<anonymous>)",
+              "Vpc.createSubnetResources (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1007:28)",
+              "Vpc.createSubnets (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1002:12)",
+              "new Vpc (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:845:10)",
+              "new SrcStack (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/lib/src-stack.ts:28:17)",
+              "inquirer.prompt.then (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/bin/cli.ts:31:5)",
+              "process._tickCallback (internal/process/next_tick.js:68:7)"
+            ]
+          }
+        ],
+        "/SrcStack/VPC/PublicSubnet2/RouteTableAssociation": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPublicSubnet2RouteTableAssociation5A808732",
+            "trace": [
+              "new Subnet (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1175:5)",
+              "new PublicSubnet (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1235:5)",
+              "availabilityZones.forEach (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1025:32)",
+              "Array.forEach (<anonymous>)",
+              "Vpc.createSubnetResources (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1007:28)",
+              "Vpc.createSubnets (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1002:12)",
+              "new Vpc (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:845:10)",
+              "new SrcStack (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/lib/src-stack.ts:28:17)",
+              "inquirer.prompt.then (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/bin/cli.ts:31:5)",
+              "process._tickCallback (internal/process/next_tick.js:68:7)"
+            ]
+          }
+        ],
+        "/SrcStack/VPC/PublicSubnet2/DefaultRoute": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPublicSubnet2DefaultRouteB7481BBA",
+            "trace": [
+              "PublicSubnet.addDefaultInternetRoute (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1191:19)",
+              "Vpc.publicSubnets.forEach.publicSubnet (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:861:22)",
+              "Array.forEach (<anonymous>)",
+              "new Vpc (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:860:46)",
+              "new SrcStack (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/lib/src-stack.ts:28:17)",
+              "inquirer.prompt.then (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/bin/cli.ts:31:5)",
+              "process._tickCallback (internal/process/next_tick.js:68:7)"
+            ]
+          }
+        ],
+        "/SrcStack/VPC/PublicSubnet2/EIP": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPublicSubnet2EIP4947BC00",
+            "trace": [
+              "PublicSubnet.addNatGateway (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1247:21)",
+              "Vpc.createNatGateways (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:978:27)",
+              "new Vpc (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:865:12)",
+              "new SrcStack (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/lib/src-stack.ts:28:17)",
+              "inquirer.prompt.then (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/bin/cli.ts:31:5)",
+              "process._tickCallback (internal/process/next_tick.js:68:7)"
+            ]
+          }
+        ],
+        "/SrcStack/VPC/PublicSubnet2/NATGateway": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPublicSubnet2NATGateway3C070193",
+            "trace": [
+              "PublicSubnet.addNatGateway (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1245:17)",
+              "Vpc.createNatGateways (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:978:27)",
+              "new Vpc (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:865:12)",
+              "new SrcStack (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/lib/src-stack.ts:28:17)",
+              "inquirer.prompt.then (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/bin/cli.ts:31:5)",
+              "process._tickCallback (internal/process/next_tick.js:68:7)"
+            ]
+          }
+        ],
+        "/SrcStack/VPC/PrivateSubnet1/Subnet": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPrivateSubnet1Subnet8BCA10E0",
+            "trace": [
+              "new Subnet (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1157:20)",
+              "new PrivateSubnet (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1274:5)",
+              "availabilityZones.forEach (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1030:33)",
+              "Array.forEach (<anonymous>)",
+              "Vpc.createSubnetResources (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1007:28)",
+              "Vpc.createSubnets (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1002:12)",
+              "new Vpc (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:845:10)",
+              "new SrcStack (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/lib/src-stack.ts:28:17)",
+              "inquirer.prompt.then (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/bin/cli.ts:31:5)",
+              "process._tickCallback (internal/process/next_tick.js:68:7)"
+            ]
+          }
+        ],
+        "/SrcStack/VPC/PrivateSubnet1/RouteTable": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPrivateSubnet1RouteTableBE8A6027",
+            "trace": [
+              "new Subnet (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1169:19)",
+              "new PrivateSubnet (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1274:5)",
+              "availabilityZones.forEach (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1030:33)",
+              "Array.forEach (<anonymous>)",
+              "Vpc.createSubnetResources (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1007:28)",
+              "Vpc.createSubnets (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1002:12)",
+              "new Vpc (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:845:10)",
+              "new SrcStack (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/lib/src-stack.ts:28:17)",
+              "inquirer.prompt.then (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/bin/cli.ts:31:5)",
+              "process._tickCallback (internal/process/next_tick.js:68:7)"
+            ]
+          }
+        ],
+        "/SrcStack/VPC/PrivateSubnet1/RouteTableAssociation": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPrivateSubnet1RouteTableAssociation347902D1",
+            "trace": [
+              "new Subnet (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1175:5)",
+              "new PrivateSubnet (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1274:5)",
+              "availabilityZones.forEach (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1030:33)",
+              "Array.forEach (<anonymous>)",
+              "Vpc.createSubnetResources (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1007:28)",
+              "Vpc.createSubnets (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1002:12)",
+              "new Vpc (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:845:10)",
+              "new SrcStack (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/lib/src-stack.ts:28:17)",
+              "inquirer.prompt.then (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/bin/cli.ts:31:5)",
+              "process._tickCallback (internal/process/next_tick.js:68:7)"
+            ]
+          }
+        ],
+        "/SrcStack/VPC/PrivateSubnet1/DefaultRoute": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPrivateSubnet1DefaultRouteAE1D6490",
+            "trace": [
+              "PrivateSubnet.addDefaultNatRoute (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1208:19)",
+              "Vpc.privateSubnets.forEach (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:874:23)",
+              "Array.forEach (<anonymous>)",
+              "new Vpc (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:867:48)",
+              "new SrcStack (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/lib/src-stack.ts:28:17)",
+              "inquirer.prompt.then (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/bin/cli.ts:31:5)",
+              "process._tickCallback (internal/process/next_tick.js:68:7)"
+            ]
+          }
+        ],
+        "/SrcStack/VPC/PrivateSubnet2/Subnet": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPrivateSubnet2SubnetCFCDAA7A",
+            "trace": [
+              "new Subnet (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1157:20)",
+              "new PrivateSubnet (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1274:5)",
+              "availabilityZones.forEach (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1030:33)",
+              "Array.forEach (<anonymous>)",
+              "Vpc.createSubnetResources (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1007:28)",
+              "Vpc.createSubnets (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1002:12)",
+              "new Vpc (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:845:10)",
+              "new SrcStack (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/lib/src-stack.ts:28:17)",
+              "inquirer.prompt.then (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/bin/cli.ts:31:5)",
+              "process._tickCallback (internal/process/next_tick.js:68:7)"
+            ]
+          }
+        ],
+        "/SrcStack/VPC/PrivateSubnet2/RouteTable": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPrivateSubnet2RouteTable0A19E10E",
+            "trace": [
+              "new Subnet (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1169:19)",
+              "new PrivateSubnet (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1274:5)",
+              "availabilityZones.forEach (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1030:33)",
+              "Array.forEach (<anonymous>)",
+              "Vpc.createSubnetResources (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1007:28)",
+              "Vpc.createSubnets (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1002:12)",
+              "new Vpc (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:845:10)",
+              "new SrcStack (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/lib/src-stack.ts:28:17)",
+              "inquirer.prompt.then (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/bin/cli.ts:31:5)",
+              "process._tickCallback (internal/process/next_tick.js:68:7)"
+            ]
+          }
+        ],
+        "/SrcStack/VPC/PrivateSubnet2/RouteTableAssociation": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPrivateSubnet2RouteTableAssociation0C73D413",
+            "trace": [
+              "new Subnet (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1175:5)",
+              "new PrivateSubnet (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1274:5)",
+              "availabilityZones.forEach (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1030:33)",
+              "Array.forEach (<anonymous>)",
+              "Vpc.createSubnetResources (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1007:28)",
+              "Vpc.createSubnets (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1002:12)",
+              "new Vpc (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:845:10)",
+              "new SrcStack (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/lib/src-stack.ts:28:17)",
+              "inquirer.prompt.then (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/bin/cli.ts:31:5)",
+              "process._tickCallback (internal/process/next_tick.js:68:7)"
+            ]
+          }
+        ],
+        "/SrcStack/VPC/PrivateSubnet2/DefaultRoute": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCPrivateSubnet2DefaultRouteF4F5CFD2",
+            "trace": [
+              "PrivateSubnet.addDefaultNatRoute (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:1208:19)",
+              "Vpc.privateSubnets.forEach (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:874:23)",
+              "Array.forEach (<anonymous>)",
+              "new Vpc (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:867:48)",
+              "new SrcStack (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/lib/src-stack.ts:28:17)",
+              "inquirer.prompt.then (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/bin/cli.ts:31:5)",
+              "process._tickCallback (internal/process/next_tick.js:68:7)"
+            ]
+          }
+        ],
+        "/SrcStack/VPC/IGW": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCIGWB7E252D3",
+            "trace": [
+              "new Vpc (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:852:19)",
+              "new SrcStack (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/lib/src-stack.ts:28:17)",
+              "inquirer.prompt.then (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/bin/cli.ts:31:5)",
+              "process._tickCallback (internal/process/next_tick.js:68:7)"
+            ]
+          }
+        ],
+        "/SrcStack/VPC/VPCGW": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCVPCGW99B986DC",
+            "trace": [
+              "new Vpc (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/vpc.ts:855:19)",
+              "new SrcStack (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/lib/src-stack.ts:28:17)",
+              "inquirer.prompt.then (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/bin/cli.ts:31:5)",
+              "process._tickCallback (internal/process/next_tick.js:68:7)"
+            ]
+          }
+        ],
+        "/SrcStack/WebTier/openSg/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "WebTieropenSg420E1C89",
+            "trace": [
+              "new SecurityGroup (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/security-group.ts:274:26)",
+              "new WebTierConstruct (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/lib/web-tier.ts:21:16)",
+              "new SrcStack (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/lib/src-stack.ts:32:21)",
+              "inquirer.prompt.then (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/bin/cli.ts:31:5)",
+              "process._tickCallback (internal/process/next_tick.js:68:7)"
+            ]
+          }
+        ],
+        "/SrcStack/WebTier/LB/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "WebTierLB0914A06C",
+            "trace": [
+              "new BaseLoadBalancer (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-elasticloadbalancingv2/lib/shared/base-load-balancer.ts:137:22)",
+              "new ApplicationLoadBalancer (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-elasticloadbalancingv2/lib/alb/application-load-balancer.ts:64:5)",
+              "new WebTierConstruct (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/lib/web-tier.ts:41:16)",
+              "new SrcStack (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/lib/src-stack.ts:32:21)",
+              "inquirer.prompt.then (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/bin/cli.ts:31:5)",
+              "process._tickCallback (internal/process/next_tick.js:68:7)"
+            ]
+          }
+        ],
+        "/SrcStack/WebTier/LB/SecurityGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "WebTierLBSecurityGroup9DAA277F",
+            "trace": [
+              "new SecurityGroup (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-ec2/lib/security-group.ts:274:26)",
+              "new ApplicationLoadBalancer (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-elasticloadbalancingv2/lib/alb/application-load-balancer.ts:70:49)",
+              "new WebTierConstruct (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/lib/web-tier.ts:41:16)",
+              "new SrcStack (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/lib/src-stack.ts:32:21)",
+              "inquirer.prompt.then (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/bin/cli.ts:31:5)",
+              "process._tickCallback (internal/process/next_tick.js:68:7)"
+            ]
+          }
+        ],
+        "/SrcStack/WebTier/LB/Listener/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "WebTierLBListenerBD3270E1",
+            "trace": [
+              "new BaseListener (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-elasticloadbalancingv2/lib/shared/base-listener.ts:19:22)",
+              "new ApplicationListener (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-elasticloadbalancingv2/lib/alb/application-listener.ts:113:5)",
+              "ApplicationLoadBalancer.addListener (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-elasticloadbalancingv2/lib/alb/application-load-balancer.ts:110:12)",
+              "new WebTierConstruct (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/lib/web-tier.ts:46:25)",
+              "new SrcStack (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/lib/src-stack.ts:32:21)",
+              "inquirer.prompt.then (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/bin/cli.ts:31:5)",
+              "process._tickCallback (internal/process/next_tick.js:68:7)"
+            ]
+          }
+        ],
+        "/SrcStack/WebTier/LB/Listener/TargetGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "WebTierLBListenerTargetGroupBEAF48FC",
+            "trace": [
+              "new TargetGroupBase (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-elasticloadbalancingv2/lib/shared/base-target-group.ts:214:21)",
+              "new ApplicationTargetGroup (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-elasticloadbalancingv2/lib/alb/application-target-group.ts:81:5)",
+              "ApplicationListener.addTargets (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/node_modules/@aws-cdk/aws-elasticloadbalancingv2/lib/alb/application-listener.ts:192:19)",
+              "new WebTierConstruct (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/lib/web-tier.ts:50:14)",
+              "new SrcStack (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/lib/src-stack.ts:32:21)",
+              "inquirer.prompt.then (/Users/forrcoll/code/arc-319-builder-session/modules/threeTierWebApp/vulnerability-src/bin/cli.ts:31:5)",
+              "process._tickCallback (internal/process/next_tick.js:68:7)"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "runtime": {
+    "libraries": {
+      "@aws-cdk/core": "1.3.0",
+      "@aws-cdk/cx-api": "1.3.0",
+      "@aws-cdk/aws-s3": "1.3.0",
+      "@aws-cdk/aws-events": "1.3.0",
+      "@aws-cdk/aws-iam": "1.3.0",
+      "@aws-cdk/region-info": "1.3.0",
+      "@aws-cdk/aws-kms": "1.3.0",
+      "@aws-cdk/aws-ec2": "1.3.0",
+      "@aws-cdk/aws-ssm": "1.3.0",
+      "@aws-cdk/aws-cloudwatch": "1.3.0",
+      "@aws-cdk/aws-elasticloadbalancingv2": "1.3.0",
+      "jsii-runtime": "node.js/v10.5.0"
+    }
+  }
+}
