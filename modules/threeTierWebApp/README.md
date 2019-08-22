@@ -33,8 +33,7 @@ TODO
 4. Overly permissive IAM policies - triggers if it has `*` access, lambda function required.
 5. Unrestricted ssh - just eliminates public access but doesn't let you whitelist , lambda function required
 6. required tags - no auto remediation, probably lambda or something else required
-7. 3 tier - RDS - vulnerability definition missing
-8. 3 tier - IAM - overly permissive roles
 
 # stretch goals
 1. Automated patching
+2. Lambda based remediation
