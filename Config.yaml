@@ -1,0 +1,234 @@
+Parameters:
+    CostCenterValue:
+      Type: String
+      Default: '900124-984'
+      MinLength: 1
+      ConstraintDescription: 'Required value.  Separate multiple values with comas.'
+    WorkloadValue:
+      Type: String
+      Default: 'WordPress'
+      MinLength: 1
+      ConstraintDescription: 'Required value.  Separate multiple values with comas.'
+    OwnerValue:
+      Type: String
+      Default: 'Brad Pitt'
+      MinLength: 1
+      ConstraintDescription: 'Required value.  Separate multiple values with comas.'
+Resources:
+    AWSConfigRule1:
+      Type: AWS::Config::ConfigRule
+      Properties:
+        Description: 'Checks whether Amazon Elastic Compute Cloud (Amazon EC2) instances have a public IP association. The rule is NON_COMPLIANT if the publicIp field is present in the Amazon EC2 instance configuration item. This rule applies only to IPv4.'
+        ConfigRuleName: EC2_INSTANCE_NO_PUBLIC_IP
+        Scope:
+          ComplianceResourceTypes:
+            - 'AWS::EC2::Instance'
+        Source:
+          Owner: AWS
+          SourceIdentifier: EC2_INSTANCE_NO_PUBLIC_IP
+    AWSConfigRule2:
+      Type: AWS::Config::ConfigRule
+      Properties:
+        Description: 'Checks that your Amazon S3 buckets do not allow public read access. The rule checks the Block Public Access settings, the bucket policy, and the bucket access control list (ACL).'
+        ConfigRuleName: S3_BUCKET_PUBLIC_READ_PROHIBITED
+        MaximumExecutionFrequency: One_Hour
+        Scope:
+          ComplianceResourceTypes:
+            - 'AWS::S3::Bucket'
+        Source:
+          Owner: AWS
+          SourceIdentifier: S3_BUCKET_PUBLIC_READ_PROHIBITED
+    AWSConfigRule3:
+      Type: AWS::Config::ConfigRule
+      Properties:
+        Description: 'Checks whether the Amazon Relational Database Service (RDS) instances are not publicly accessible. The rule is non-compliant if the publiclyAccessible field is true in the instance configuration item.'
+        ConfigRuleName: RDS_INSTANCE_PUBLIC_ACCESS_CHECK
+        Scope:
+          ComplianceResourceTypes:
+            - 'AWS::RDS::DBInstance'
+        Source:
+          Owner: AWS
+          SourceIdentifier: RDS_INSTANCE_PUBLIC_ACCESS_CHECK
+    AWSConfigRule4:
+      Type: AWS::Config::ConfigRule
+      Properties:
+        Description: 'Checks whether the default version of AWS Identity and Access Management (IAM) policies do not have administrator access. If any statement has \"Effect\": \"Allow\" with \"Action\": \"*\" over \"Resource\": \"*\", the rule is non-compliant.'
+        ConfigRuleName: IAM_POLICY_NO_STATEMENTS_WITH_ADMIN_ACCESS
+        Scope:
+          ComplianceResourceTypes:
+            - 'AWS::IAM::Policy'
+        Source:
+          Owner: AWS
+          SourceIdentifier: IAM_POLICY_NO_STATEMENTS_WITH_ADMIN_ACCESS
+    AWSConfigRule5:
+      Type: AWS::Config::ConfigRule
+      Properties:
+        Description: 'Checks whether security groups that are in use disallow unrestricted incoming SSH traffic.'
+        ConfigRuleName: INCOMING_SSH_DISABLED
+        Scope:
+          ComplianceResourceTypes:
+            - 'AWS::EC2::SecurityGroup'
+        Source:
+          Owner: AWS
+          SourceIdentifier: INCOMING_SSH_DISABLED
+    AWSConfigRule6:
+      Type: AWS::Config::ConfigRule
+      Properties:
+        Description: 'Checks whether your resources have the tags that you specify.'
+        InputParameters:
+          tag1Key: CostCenter
+          tag1Value: !Ref CostCenterValue
+          tag2Key: Workload
+          tag2Value: !Ref WorkloadValue
+          tag3Key: Owner
+          tag3Value: !Ref OwnerValue
+        ConfigRuleName: REQUIRED_TAGS
+        Scope:
+          ComplianceResourceTypes:
+            - 'AWS::EC2::Instance'
+            - 'AWS::RDS::DBInstance'
+            - 'AWS::EC2::SecurityGroup'
+        Source:
+          Owner: AWS
+          SourceIdentifier: REQUIRED_TAGS
+    AutoRemediationRole:
+      Type: 'AWS::IAM::Role'
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - ec2.amazonaws.com
+                  - events.amazonaws.com
+                  - ssm.amazonaws.com
+              Action:
+                - 'sts:AssumeRole'
+        ManagedPolicyArns:
+          - 'arn:aws:iam::aws:policy/service-role/AmazonSSMAutomationRole'
+        Policies:
+          - PolicyName: ConfigRemediationS3
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement: #/This section needs to be refined add other resources, least priv
+                - Sid: AllowS3Remediation
+                  Effect: Allow
+                  Action: '*'
+                  Resource: 'arn:aws:s3:::*'
+    RemediationPassRolePolicy:
+      Type: 'AWS::IAM::Policy'
+      Properties:
+        PolicyName: ConfigRemediation
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - 'iam:PassRole'
+              Resource:
+                'Fn::GetAtt':
+                  - AutoRemediationRole
+                  - Arn
+        Roles:
+          - Ref: AutoRemediationRole
+    ConfigRule1Remediation:
+        Type: 'AWS::Config::RemediationConfiguration'
+        Properties:
+          ConfigRuleName: EC2_INSTANCE_NO_PUBLIC_IP
+          Parameters:
+              AutomationAssumeRole:
+                  StaticValue:
+                    Values:
+                      - Fn::GetAtt: AutoRemediationRole.Arn
+              InstanceId:
+                  StaticValue:
+                    Values:
+                      - '*'
+          TargetId: 'AWS-StopEC2Instance'
+          TargetType: 'SSM_DOCUMENT'
+          TargetVersion: '1'
+    ConfigRule2Remediation:
+        Type: 'AWS::Config::RemediationConfiguration'
+        Properties:
+          ConfigRuleName: S3_BUCKET_PUBLIC_READ_PROHIBITED
+          Parameters:
+              AutomationAssumeRole:
+                  StaticValue:
+                    Values:
+                      - Fn::GetAtt: AutoRemediationRole.Arn
+              S3BucketName:
+                  StaticValue:
+                    Values:
+                      - '*'
+          TargetId: 'AWS-DisableS3BucketPublicReadWrite'
+          TargetType: 'SSM_DOCUMENT'
+          TargetVersion: '1'
+    ConfigRule3Remediation:
+        Type: 'AWS::Config::RemediationConfiguration'
+        Properties:
+          ConfigRuleName: RDS_INSTANCE_PUBLIC_ACCESS_CHECK
+          Parameters:
+              AutomationAssumeRole:
+                  StaticValue:
+                    Values:
+                      - Fn::GetAtt: AutoRemediationRole.Arn
+              InstanceId:
+                  StaticValue:
+                    Values:
+                      - '*'
+          TargetId: 'AWS-StopRdsInstance'
+          TargetType: 'SSM_DOCUMENT'
+          TargetVersion: '1'
+    # ConfigRule4Remediation: No good managed remediation
+    #     Type: 'AWS::Config::RemediationConfiguration'
+    #     Properties:
+    #       ConfigRuleName: IAM_POLICY_NO_STATEMENTS_WITH_ADMIN_ACCESS
+    #       Parameters:
+    #           AutomationAssumeRole:
+    #               StaticValue:
+    #                 Values:
+    #                   - Fn::GetAtt: AutoRemediationRole.Arn
+    #           InstanceId:
+    #               StaticValue:
+    #                 Values:
+    #                   - '*'
+    #       TargetId: 'AWS-StopRdsInstance'
+    #       TargetType: 'SSM_DOCUMENT'
+    #       TargetVersion: '1'
+        ConfigRule5Remediation:
+            Type: 'AWS::Config::RemediationConfiguration'
+            Properties:
+              ConfigRuleName: INCOMING_SSH_DISABLED
+              Parameters:
+                  AutomationAssumeRole:
+                      StaticValue:
+                        Values:
+                          - Fn::GetAtt: AutoRemediationRole.Arn
+                  GroupId:
+                      StaticValue:
+                        Values:
+                          - '*'
+                  IpAddressToBlock:
+                      StaticValue:
+                        Values:
+                          - '172.168.1.1'
+              TargetId: 'AWS-DisablePublicAccessForSecurityGroup'
+              TargetType: 'SSM_DOCUMENT'
+              TargetVersion: '1'
+        # ConfigRule6Remediation: #/Blocks a certain IP addres, not whitelist a good one
+        #     Type: 'AWS::Config::RemediationConfiguration'
+        #     Properties:
+        #       ConfigRuleName: REQUIRED_TAGS
+        #       Parameters:
+        #           AutomationAssumeRole:
+        #               StaticValue:
+        #                 Values:
+        #                   - Fn::GetAtt: AutoRemediationRole.Arn
+        #           GroupId:
+        #               StaticValue:
+        #                 Values:
+        #                   - '*'
+        #       TargetId: 'AWS-DisablePublicAccessForSecurityGroup'
+        #       TargetType: 'SSM_DOCUMENT'
+        #       TargetVersion: '1'
