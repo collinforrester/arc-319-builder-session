@@ -108,14 +108,19 @@ Resources:
         ManagedPolicyArns:
           - 'arn:aws:iam::aws:policy/service-role/AmazonSSMAutomationRole'
         Policies:
-          - PolicyName: ConfigRemediationS3
+          - PolicyName: ConfigRemediation319
             PolicyDocument:
               Version: '2012-10-17'
               Statement: #/This section needs to be refined add other resources, least priv
-                - Sid: AllowS3Remediation
+                - Sid: AllowRemediation
                   Effect: Allow
-                  Action: '*'
-                  Resource: 'arn:aws:s3:::*'
+                  Action:
+                    - 's3:PutBucketPublicAccessBlock'
+                    - 'ec2:DisassociateAddress'
+                    - 'rds:ModifyDBInstance'
+                    - 'ec2:RevokeSecurityGroupIngress'
+                    - 'iam:PutRolePolicy'
+                  Resource: '*'
     RemediationPassRolePolicy:
       Type: 'AWS::IAM::Policy'
       Properties:
@@ -196,26 +201,26 @@ Resources:
     #       TargetId: 'AWS-StopRdsInstance'
     #       TargetType: 'SSM_DOCUMENT'
     #       TargetVersion: '1'
-        ConfigRule5Remediation:
-            Type: 'AWS::Config::RemediationConfiguration'
-            Properties:
-              ConfigRuleName: INCOMING_SSH_DISABLED
-              Parameters:
-                  AutomationAssumeRole:
-                      StaticValue:
-                        Values:
-                          - Fn::GetAtt: AutoRemediationRole.Arn
-                  GroupId:
-                      StaticValue:
-                        Values:
-                          - '*'
-                  IpAddressToBlock:
-                      StaticValue:
-                        Values:
-                          - '172.168.1.1'
-              TargetId: 'AWS-DisablePublicAccessForSecurityGroup'
-              TargetType: 'SSM_DOCUMENT'
-              TargetVersion: '1'
+        # ConfigRule5Remediation:
+        #     Type: 'AWS::Config::RemediationConfiguration'
+        #     Properties:
+        #       ConfigRuleName: INCOMING_SSH_DISABLED
+        #       Parameters:
+        #           AutomationAssumeRole:
+        #               StaticValue:
+        #                 Values:
+        #                   - Fn::GetAtt: AutoRemediationRole.Arn
+        #           GroupId:
+        #               StaticValue:
+        #                 Values:
+        #                   - '*'
+        #           IpAddressToBlock:
+        #               StaticValue:
+        #                 Values:
+        #                   - '172.168.1.1'
+        #       TargetId: 'AWS-DisablePublicAccessForSecurityGroup'
+        #       TargetType: 'SSM_DOCUMENT'
+        #       TargetVersion: '1'
         # ConfigRule6Remediation: #/Blocks a certain IP addres, not whitelist a good one
         #     Type: 'AWS::Config::RemediationConfiguration'
         #     Properties:
