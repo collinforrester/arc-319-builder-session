@@ -1,15 +1,25 @@
 Parameters:
-    CostCenterValue:
+    MyIPAddress:
+      Type: String
+      Default: 'Enter Current IP'
+      MinLength: 1
+      ConstraintDescription: 'IP address of current workstation to allow for ingress SSH access'
+    MyEmailAddress:
+      Type: String
+      Default: 'Enter Valid Email address'
+      MinLength: 1
+      ConstraintDescription: 'Email address used for findings notification'
+    TagCostCenterValue:
       Type: String
       Default: '900124-984'
       MinLength: 1
       ConstraintDescription: 'Required value.  Separate multiple values with comas.'
-    WorkloadValue:
+    TagWorkloadValue:
       Type: String
       Default: 'WordPress'
       MinLength: 1
       ConstraintDescription: 'Required value.  Separate multiple values with comas.'
-    OwnerValue:
+    TagOwnerValue:
       Type: String
       Default: 'Brad Pitt'
       MinLength: 1
@@ -77,11 +87,11 @@ Resources:
         Description: 'Checks whether your resources have the tags that you specify.'
         InputParameters:
           tag1Key: CostCenter
-          tag1Value: !Ref CostCenterValue
+          tag1Value: !Ref TagCostCenterValue
           tag2Key: Workload
-          tag2Value: !Ref WorkloadValue
+          tag2Value: !Ref TagWorkloadValue
           tag3Key: Owner
-          tag3Value: !Ref OwnerValue
+          tag3Value: !Ref TagOwnerValue
         ConfigRuleName: REQUIRED_TAGS
         Scope:
           ComplianceResourceTypes:
@@ -140,22 +150,27 @@ Resources:
     ConfigRule1Remediation:
         Type: 'AWS::Config::RemediationConfiguration'
         Properties:
+          Automatic: 'true'
+          MaximumAutomaticAttempts: '5'
+          RetryAttemptSeconds: '60'
           ConfigRuleName: EC2_INSTANCE_NO_PUBLIC_IP
           Parameters:
               AutomationAssumeRole:
                   StaticValue:
                     Values:
                       - Fn::GetAtt: AutoRemediationRole.Arn
-              InstanceId:
-                  StaticValue:
-                    Values:
-                      - '*'
-          TargetId: 'AWS-StopEC2Instance'
+              AllocationId:
+                  ResourceValue:
+                    Value: 'RESOURCE_ID'
+          TargetId: 'AWS-ReleaseElasticIP'
           TargetType: 'SSM_DOCUMENT'
           TargetVersion: '1'
     ConfigRule2Remediation:
         Type: 'AWS::Config::RemediationConfiguration'
         Properties:
+          Automatic: 'true'
+          MaximumAutomaticAttempts: '5'
+          RetryAttemptSeconds: '60'
           ConfigRuleName: S3_BUCKET_PUBLIC_READ_PROHIBITED
           Parameters:
               AutomationAssumeRole:
@@ -163,15 +178,17 @@ Resources:
                     Values:
                       - Fn::GetAtt: AutoRemediationRole.Arn
               S3BucketName:
-                  StaticValue:
-                    Values:
-                      - '*'
+                  ResourceValue:
+                    Value: 'RESOURCE_ID'
           TargetId: 'AWS-DisableS3BucketPublicReadWrite'
           TargetType: 'SSM_DOCUMENT'
           TargetVersion: '1'
     ConfigRule3Remediation:
         Type: 'AWS::Config::RemediationConfiguration'
         Properties:
+          Automatic: 'true'
+          MaximumAutomaticAttempts: '5'
+          RetryAttemptSeconds: '60'
           ConfigRuleName: RDS_INSTANCE_PUBLIC_ACCESS_CHECK
           Parameters:
               AutomationAssumeRole:
@@ -179,9 +196,8 @@ Resources:
                     Values:
                       - Fn::GetAtt: AutoRemediationRole.Arn
               InstanceId:
-                  StaticValue:
-                    Values:
-                      - '*'
+                  ResourceValue:
+                    Value: 'RESOURCE_ID'
           TargetId: 'AWS-StopRdsInstance'
           TargetType: 'SSM_DOCUMENT'
           TargetVersion: '1'
