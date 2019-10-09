@@ -126,6 +126,7 @@ Resources:
                   Effect: Allow
                   Action:
                     - 's3:PutBucketPublicAccessBlock'
+                    - 'S3:PutEncryptionConfiguration'
                     - 'ec2:DisassociateAddress'
                     - 'rds:ModifyDBInstance'
                     - 'ec2:RevokeSecurityGroupIngress'
@@ -253,3 +254,7 @@ Resources:
         #       TargetId: 'AWS-DisablePublicAccessForSecurityGroup'
         #       TargetType: 'SSM_DOCUMENT'
         #       TargetVersion: '1'
+Outputs:
+  IAMRoleArn:
+    Description: IAM Role used for automated Remediation
+    Value: !GetAtt AutoRemediationRole.Arn
