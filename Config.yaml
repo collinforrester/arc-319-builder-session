@@ -25,6 +25,35 @@ Parameters:
       MinLength: 1
       ConstraintDescription: 'Required value.  Separate multiple values with comas.'
 Resources:
+    MFALambdaExecutionRole:
+        Type: AWS::IAM::Role
+        Properties:
+          AssumeRolePolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Principal:
+                  Service:
+                    - lambda.amazonaws.com
+                Action: sts:AssumeRole
+          Policies:
+            -
+              PolicyName: "AllowSNSPublish"
+              PolicyDocument:
+                Version: "2012-10-17"
+                Statement:
+                  - Effect: "Allow"
+                    Action: "sns:Publish"
+                    Resource: !Sub "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${AWS::AccountId}-custom-remediation-topic"
+            -
+              PolicyName: "AllowIamAndConfigRead"
+              PolicyDocument:
+                  Version: "2012-10-17"
+                  Statement:
+                  - Effect: "Allow"
+                    Action: ["config:ListDiscoveredResources", "iam:ListGroupsForUser", "iam:RemoveUserFromGroup"]
+                    Resource: "*"
+    
     IAMLambdaExecutionRole:
       Type: AWS::IAM::Role
       Properties:
@@ -46,18 +75,23 @@ Resources:
                   Action: "sns:Publish"
                   Resource: !Sub "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${AWS::AccountId}-custom-remediation-topic"
           -
-            PolicyName: "AllowConfigList"
+            PolicyName: "AllowIamAndConfigRead"
             PolicyDocument:
                 Version: "2012-10-17"
                 Statement:
                 - Effect: "Allow"
-                  Action: "config:ListDiscoveredResources"
+                  Action: ["config:ListDiscoveredResources", "iam:GetPolicy", "iam:ListEntitiesForPolicy"]
                   Resource: "*"
     
     IAMRemediationSNSTopic:
       Type: 'AWS::SNS::Topic'
       Properties:
         TopicName: !Sub "${AWS::AccountId}-iam-remediation-topic"
+
+    MFARemediationSNSTopic:
+        Type: 'AWS::SNS::Topic'
+        Properties:
+            TopicName: !Sub "${AWS::AccountId}-mfa-remediation-topic"
     
     CustomRemediationEmailTopic:
       Type: 'AWS::SNS::Topic'
@@ -67,6 +101,14 @@ Resources:
           - Endpoint: !Ref MyEmailAddress
             Protocol: email
     
+    MFASNSInvokeLambdaPermission:
+        Type: AWS::Lambda::Permission
+        Properties:
+            Action: lambda:InvokeFunction
+            FunctionName: !Ref MFARemediationFunction
+            Principal: sns.amazonaws.com
+            SourceArn: !Sub "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${AWS::AccountId}-mfa-remediation-topic"
+
     IAMSNSInvokeLambdaPermission:
         Type: AWS::Lambda::Permission
         Properties:
@@ -82,7 +124,17 @@ Resources:
             Protocol: lambda
             TopicArn: !Ref IAMRemediationSNSTopic
         DependsOn:
-            - IAMRemediationLambdaFunction      
+            - IAMRemediationLambdaFunction
+    
+    MFARemediationLambdaFunctionSubscription:
+        Type: 'AWS::SNS::Subscription'
+        Properties:
+            Endpoint: !GetAtt MFARemediationFunction.Arn
+            Protocol: lambda
+            TopicArn: !Ref MFARemediationSNSTopic
+        DependsOn:
+            - MFARemediationFunction 
+
     IAMRemediationLambdaFunction:
       Type: AWS::Lambda::Function
       Properties:
@@ -116,7 +168,7 @@ Resources:
             };
             
             function getPrintInfo(policy, attachedEntities) {
-                return `You're getting this notification because the policy listed below is in violation of AWS Config rule monitoring for in proper IAM Admin permission usage.  Please review the details below under attached entities and remove admin permissions immediately.
+                return `You're getting this notification because the policy listed below is in violation of AWS Config rule monitoring for improper IAM Admin permission usage.  Please review the details below under attached entities and remove admin permissions immediately.
             
             Name:\t ${policy.PolicyName}
             PolicyId:\t ${policy.PolicyId}
@@ -196,6 +248,103 @@ Resources:
         Runtime: nodejs8.10
         Timeout: 3
 
+    MFARemediationFunction:
+        Type: AWS::Lambda::Function
+        Properties:
+            Code:
+                ZipFile: |
+                    const AWS = require('aws-sdk');
+                    const configService = new AWS.ConfigService();
+                    const iam = new AWS.IAM();
+                    
+                    exports.handler = async (event) => {
+                        console.log("EVENT\n" + JSON.stringify(event, null, 2));
+                        const resourceIds = event.Records.map(getRecordIdsFromSnsMessage);
+                        
+                        const configResults = await getDiscoveredIamResources(resourceIds);
+                        const userName = getUserNameFromConfigResults(configResults);
+                        const groupNamesAttached = await getGroupNamesAttachedToUser(userName);
+                        console.log('removing following groups ', groupNamesAttached);
+                        const removed = await removeUserFromGroups(userName, groupNamesAttached);
+                        const debugInfo = getPrintInfo(userName, groupNamesAttached);
+                        await sendEmail(debugInfo);
+                        console.log('Emailing information: ', debugInfo);
+                        const response = {
+                            statusCode: 200,
+                            body: debugInfo
+                        };
+                        return response;
+                    };
+                    
+                    function getPrintInfo(userName, groupNames) {
+                        return `You're getting this notification because the user listed below is in violation of AWS Config rule monitoring for users without MFA enabled.  All access has been revoked.  Please add MFA and restore groups.  Groups removed are listed below for reference.
+                    
+                    User:\t ${userName}
+                    
+                    Attached Groups(${groupNames.length}): ${groupNames.join(', ')}
+                        `;
+                    }
+                    
+                    async function sendEmail(text) {
+                        var params = {
+                            Subject: process.env.EMAIL_SUBJECT,
+                            Message: text,
+                            TopicArn: process.env.NOTIFICATION_TOPIC_ARN
+                        };
+                        
+                        const publishTextPromise = new AWS.SNS({apiVersion: '2010-03-31'}).publish(params).promise();
+                        return publishTextPromise;
+                    }
+                    
+                    async function getGroupNamesAttachedToUser(userName) {
+                        const params = {
+                        UserName: userName
+                        };
+                        const result = await iam.listGroupsForUser(params).promise();
+                        console.log(result);
+                        return result.Groups.map(g => g.GroupName);
+                    }
+                    
+                    async function removeUserFromGroups(userName, groupNames) {
+                        const promises = await groupNames.map(async name => {
+                            var params = {
+                            GroupName: name,
+                            UserName: userName
+                            };
+                            return await iam.removeUserFromGroup(params).promise();
+                        });
+                        
+                        return Promise.all(promises);
+                    }
+                    
+                    function getUserNameFromConfigResults(results) {
+                        return results.resourceIdentifiers[0].resourceName;
+                    }
+                    
+                    async function getDiscoveredIamResources(resourceIds) {
+                        const params = {
+                        resourceType: 'AWS::IAM::User',
+                        includeDeletedResources: false,
+                        resourceIds: resourceIds
+                        };
+                        console.log('Requesting these resource Ids from Config: ', resourceIds); 
+                        return await configService.listDiscoveredResources(params).promise();
+                    }
+                    
+                    function getRecordIdsFromSnsMessage(record) {
+                        return record.Sns.Message;
+                    }
+              
+            Description: ARC319 Lambda Remediation for overly IAM users with missing MFA
+            Handler: index.handler
+            MemorySize: 128
+            Environment:
+                Variables:
+                    NOTIFICATION_TOPIC_ARN: !Ref CustomRemediationEmailTopic
+                    EMAIL_SUBJECT: "IAM Security Violations found for IAM USERS WITHOUT MFA"
+            Role: !GetAtt MFALambdaExecutionRole.Arn
+            Runtime: nodejs8.10
+            Timeout: 3
 
     AWSConfigRule1:
       Type: AWS::Config::ConfigRule
