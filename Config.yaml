@@ -53,7 +53,7 @@ Resources:
                   - Effect: "Allow"
                     Action: ["config:ListDiscoveredResources", "iam:ListGroupsForUser", "iam:RemoveUserFromGroup"]
                     Resource: "*"
-    
+
     IAMLambdaExecutionRole:
       Type: AWS::IAM::Role
       Properties:
@@ -82,7 +82,7 @@ Resources:
                 - Effect: "Allow"
                   Action: ["config:ListDiscoveredResources", "iam:GetPolicy", "iam:ListEntitiesForPolicy"]
                   Resource: "*"
-    
+
     IAMRemediationSNSTopic:
       Type: 'AWS::SNS::Topic'
       Properties:
@@ -92,7 +92,7 @@ Resources:
         Type: 'AWS::SNS::Topic'
         Properties:
             TopicName: !Sub "${AWS::AccountId}-mfa-remediation-topic"
-    
+
     CustomRemediationEmailTopic:
       Type: 'AWS::SNS::Topic'
       Properties:
@@ -100,7 +100,7 @@ Resources:
         Subscription:
           - Endpoint: !Ref MyEmailAddress
             Protocol: email
-    
+
     MFASNSInvokeLambdaPermission:
         Type: AWS::Lambda::Permission
         Properties:
@@ -116,7 +116,7 @@ Resources:
             FunctionName: !Ref IAMRemediationLambdaFunction
             Principal: sns.amazonaws.com
             SourceArn: !Sub "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${AWS::AccountId}-iam-remediation-topic"
-    
+
     IAMRemediationLambdaFunctionSubscription:
         Type: 'AWS::SNS::Subscription'
         Properties:
@@ -125,7 +125,7 @@ Resources:
             TopicArn: !Ref IAMRemediationSNSTopic
         DependsOn:
             - IAMRemediationLambdaFunction
-    
+
     MFARemediationLambdaFunctionSubscription:
         Type: 'AWS::SNS::Subscription'
         Properties:
@@ -133,7 +133,7 @@ Resources:
             Protocol: lambda
             TopicArn: !Ref MFARemediationSNSTopic
         DependsOn:
-            - MFARemediationFunction 
+            - MFARemediationFunction
 
     IAMRemediationLambdaFunction:
       Type: AWS::Lambda::Function
@@ -144,12 +144,12 @@ Resources:
             const configService = new AWS.ConfigService();
             const sts = new AWS.STS();
             const iam = new AWS.IAM();
-            
-            
+
+
             exports.handler = async (event) => {
                 console.log("EVENT\n" + JSON.stringify(event, null, 2));
                 const resourceIds = event.Records.map(getRecordIdsFromSnsMessage);
-                
+
                 const configResults = await getDiscoveredIamResources(resourceIds);
                 const policyName = getPolicyNameFromConfigResults(configResults);
                 const accountId = await getAwsAccountNumber();
@@ -166,35 +166,35 @@ Resources:
                 };
                 return response;
             };
-            
+
             function getPrintInfo(policy, attachedEntities) {
                 return `You're getting this notification because the policy listed below is in violation of AWS Config rule monitoring for improper IAM Admin permission usage.  Please review the details below under attached entities and remove admin permissions immediately.
-            
+
             Name:\t ${policy.PolicyName}
             PolicyId:\t ${policy.PolicyId}
             Arn:\t ${policy.Arn}
             Description:\t ${policy.Description}
             CreateDate:\t ${policy.CreateDate}
-            
+
             Attached Entity Details
             Attached PolicyGroups(${attachedEntities.PolicyGroups.length}): ${JSON.stringify(attachedEntities.PolicyGroups.map(i => i.GroupName))}
             Attached PolicyUsers(${attachedEntities.PolicyUsers.length}): ${JSON.stringify(attachedEntities.PolicyUsers.map(i => i.UserName))}
             Attached PolicyRoles(${attachedEntities.PolicyRoles.length}): ${JSON.stringify(attachedEntities.PolicyRoles.map(i => i.RoleName))}
                 `;
             }
-            
+
             async function sendEmail(text) {
                 var params = {
                     Subject: process.env.EMAIL_SUBJECT,
                   Message: text,
                   TopicArn: process.env.NOTIFICATION_TOPIC_ARN
                 };
-                
+
                 // Create promise and SNS service object
                 const publishTextPromise = new AWS.SNS({apiVersion: '2010-03-31'}).publish(params).promise();
                 return publishTextPromise;
             }
-            
+
             async function getPolicy(arn) {
                 const params = {
                   PolicyArn: arn
@@ -203,7 +203,7 @@ Resources:
                 console.log("Policy Data\n" + JSON.stringify(data, null, 2));
                 return data.Policy;
             }
-            
+
             async function getEntitiesAttachedToPolicy(arn) {
                 const params = {
                   PolicyArn: arn
@@ -212,31 +212,31 @@ Resources:
                 console.log("Entity Atttachment Data\n" + JSON.stringify(data, null, 2));
                 return data;
             }
-            
+
             async function getAwsAccountNumber() {
                 const data = await sts.getCallerIdentity({}).promise();
                 console.log('Account information: ', data);
                 return data.Account;
             }
-            
+
             function getPolicyNameFromConfigResults(results) {
                 return results.resourceIdentifiers[0].resourceName;
             }
-            
+
             async function getDiscoveredIamResources(resourceIds) {
                 const params = {
                   resourceType: 'AWS::IAM::Policy',
                   includeDeletedResources: false,
                   resourceIds: resourceIds
                 };
-                console.log('Requesting these resource Ids from Config: ', resourceIds); 
+                console.log('Requesting these resource Ids from Config: ', resourceIds);
                 return await configService.listDiscoveredResources(params).promise();
             }
-            
+
             function getRecordIdsFromSnsMessage(record) {
                 return record.Sns.Message;
             }
-                
+
         Description: ARC319 Lambda Remediation for overly permissive IAM policies
         Handler: index.handler
         MemorySize: 128
@@ -256,11 +256,11 @@ Resources:
                     const AWS = require('aws-sdk');
                     const configService = new AWS.ConfigService();
                     const iam = new AWS.IAM();
-                    
+
                     exports.handler = async (event) => {
                         console.log("EVENT\n" + JSON.stringify(event, null, 2));
                         const resourceIds = event.Records.map(getRecordIdsFromSnsMessage);
-                        
+
                         const configResults = await getDiscoveredIamResources(resourceIds);
                         const userName = getUserNameFromConfigResults(configResults);
                         const groupNamesAttached = await getGroupNamesAttachedToUser(userName);
@@ -275,27 +275,27 @@ Resources:
                         };
                         return response;
                     };
-                    
+
                     function getPrintInfo(userName, groupNames) {
                         return `You're getting this notification because the user listed below is in violation of AWS Config rule monitoring for users without MFA enabled.  All access has been revoked.  Please add MFA and restore groups.  Groups removed are listed below for reference.
-                    
+
                     User:\t ${userName}
-                    
+
                     Attached Groups(${groupNames.length}): ${groupNames.join(', ')}
                         `;
                     }
-                    
+
                     async function sendEmail(text) {
                         var params = {
                             Subject: process.env.EMAIL_SUBJECT,
                             Message: text,
                             TopicArn: process.env.NOTIFICATION_TOPIC_ARN
                         };
-                        
+
                         const publishTextPromise = new AWS.SNS({apiVersion: '2010-03-31'}).publish(params).promise();
                         return publishTextPromise;
                     }
-                    
+
                     async function getGroupNamesAttachedToUser(userName) {
                         const params = {
                         UserName: userName
@@ -304,7 +304,7 @@ Resources:
                         console.log(result);
                         return result.Groups.map(g => g.GroupName);
                     }
-                    
+
                     async function removeUserFromGroups(userName, groupNames) {
                         const promises = await groupNames.map(async name => {
                             var params = {
@@ -313,28 +313,28 @@ Resources:
                             };
                             return await iam.removeUserFromGroup(params).promise();
                         });
-                        
+
                         return Promise.all(promises);
                     }
-                    
+
                     function getUserNameFromConfigResults(results) {
                         return results.resourceIdentifiers[0].resourceName;
                     }
-                    
+
                     async function getDiscoveredIamResources(resourceIds) {
                         const params = {
                         resourceType: 'AWS::IAM::User',
                         includeDeletedResources: false,
                         resourceIds: resourceIds
                         };
-                        console.log('Requesting these resource Ids from Config: ', resourceIds); 
+                        console.log('Requesting these resource Ids from Config: ', resourceIds);
                         return await configService.listDiscoveredResources(params).promise();
                     }
-                    
+
                     function getRecordIdsFromSnsMessage(record) {
                         return record.Sns.Message;
                     }
-              
+
             Description: ARC319 Lambda Remediation for overly IAM users with missing MFA
             Handler: index.handler
             MemorySize: 128
@@ -422,6 +422,17 @@ Resources:
         Source:
           Owner: AWS
           SourceIdentifier: REQUIRED_TAGS
+    AWSConfigRule7:
+      Type: AWS::Config::ConfigRule
+      Properties:
+        Description: 'Checks whether your IAM users have multi factor authentication turned on'
+        ConfigRuleName: IAM_USER_MFA_ENABLED
+        Scope:
+          ComplianceResourceTypes:
+            - 'AWS::IAM::User'
+        Source:
+          Owner: AWS
+          SourceIdentifier: IAM_USER_MFA_ENABLED
     AutoRemediationRole:
       Type: 'AWS::IAM::Role'
       Properties:
@@ -442,16 +453,17 @@ Resources:
           - PolicyName: ConfigRemediation319
             PolicyDocument:
               Version: '2012-10-17'
-              Statement: #/This section needs to be refined add other resources, least priv
+              Statement:
                 - Sid: AllowRemediation
                   Effect: Allow
                   Action:
                     - 's3:PutBucketPublicAccessBlock'
                     - 'S3:PutEncryptionConfiguration'
-                    - 'ec2:DisassociateAddress'
+                    - 'ec2:StopInstances'
                     - 'rds:ModifyDBInstance'
                     - 'ec2:RevokeSecurityGroupIngress'
                     - 'iam:PutRolePolicy'
+                    - 'sns:Publish'
                   Resource: '*'
     RemediationPassRolePolicy:
       Type: 'AWS::IAM::Policy'
@@ -481,10 +493,10 @@ Resources:
                   StaticValue:
                     Values:
                       - Fn::GetAtt: AutoRemediationRole.Arn
-              AllocationId:
+              InstanceId:
                   ResourceValue:
                     Value: 'RESOURCE_ID'
-          TargetId: 'AWS-ReleaseElasticIP'
+          TargetId: 'AWS-StopEC2Instance'
           TargetType: 'SSM_DOCUMENT'
           TargetVersion: '1'
     ConfigRule2Remediation:
@@ -505,25 +517,68 @@ Resources:
           TargetId: 'AWS-DisableS3BucketPublicReadWrite'
           TargetType: 'SSM_DOCUMENT'
           TargetVersion: '1'
-    ConfigRule3Remediation:
+    # ConfigRule3Remediation:
+    #     Type: 'AWS::Config::RemediationConfiguration'
+    #     Properties:
+    #       Automatic: 'true'
+    #       MaximumAutomaticAttempts: '5'
+    #       RetryAttemptSeconds: '60'
+    #       ConfigRuleName: RDS_INSTANCE_PUBLIC_ACCESS_CHECK
+    #       Parameters:
+    #           AutomationAssumeRole:
+    #               StaticValue:
+    #                 Values:
+    #                   - Fn::GetAtt: AutoRemediationRole.Arn
+    #           InstanceId:
+    #               ResourceValue:
+    #                 Value: 'RESOURCE_ID'
+    #       TargetId: 'AWS-StopRdsInstance'
+    #       TargetType: 'SSM_DOCUMENT'
+    #       TargetVersion: '1'
+    ConfigRule4Remediation:
         Type: 'AWS::Config::RemediationConfiguration'
         Properties:
           Automatic: 'true'
           MaximumAutomaticAttempts: '5'
           RetryAttemptSeconds: '60'
-          ConfigRuleName: RDS_INSTANCE_PUBLIC_ACCESS_CHECK
+          ConfigRuleName: IAM_POLICY_NO_STATEMENTS_WITH_ADMIN_ACCESS
           Parameters:
               AutomationAssumeRole:
                   StaticValue:
                     Values:
                       - Fn::GetAtt: AutoRemediationRole.Arn
-              InstanceId:
+              Message:
                   ResourceValue:
                     Value: 'RESOURCE_ID'
-          TargetId: 'AWS-StopRdsInstance'
+              TopicArn:
+                  StaticValue:
+                    Values:
+                      - Ref: IAMRemediationSNSTopic
+          TargetId: 'AWS-PublishSNSNotification'
           TargetType: 'SSM_DOCUMENT'
           TargetVersion: '1'
-    
+    ConfigRule7Remediation:
+        Type: 'AWS::Config::RemediationConfiguration'
+        Properties:
+          Automatic: 'true'
+          MaximumAutomaticAttempts: '5'
+          RetryAttemptSeconds: '60'
+          ConfigRuleName: IAM_USER_MFA_ENABLED
+          Parameters:
+              AutomationAssumeRole:
+                  StaticValue:
+                    Values:
+                      - Fn::GetAtt: AutoRemediationRole.Arn
+              Message:
+                  ResourceValue:
+                    Value: 'RESOURCE_ID'
+              TopicArn:
+                  StaticValue:
+                    Values:
+                      - Ref: MFARemediationSNSTopic
+          TargetId: 'AWS-PublishSNSNotification'
+          TargetType: 'SSM_DOCUMENT'
+          TargetVersion: '1'
 Outputs:
   IAMRoleArn:
     Description: IAM Role used for automated Remediation
