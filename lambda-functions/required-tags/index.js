@@ -1,53 +1,27 @@
 const AWS = require("aws-sdk");
 const configService = new AWS.ConfigService();
-const sts = new AWS.STS();
-const iam = new AWS.IAM();
 const s3 = new AWS.S3();
 const ec2 = new AWS.EC2();
 const rds = new AWS.RDS();
-
-const Tags = [
-  {
-    Key: "CostCenterValue",
-    Value: "900124-984"
-  },
-  {
-    Key: "Workload",
-    Value: "ACME.com wordpress"
-  },
-  {
-    Key: "Owner",
-    Value: "Brad Pitt"
-  }
-];
-
+const Tags = [ { Key: "CostCenterValue", Value: process.env.CostCenterValue }, { Key: "Workload", Value: process.env.Workload }, { Key: "Owner", Value: process.env.Owner } ];
 exports.handler = async event => {
   console.log("EVENT\n" + JSON.stringify(event, null, 2));
-  const resourceId = event.Records.map(getRecordIdsFromSnsMessage)[0];
-
-  // get list of non compliant resources under this rule
+  const resourceId = event.Records.map(e => e.Sns.Message)[0];
   const resources = await getComplianceDetails();
-
-  // grab info from this event, pluck out the specific resource ID details (type)
   const resource = resources.filter(
     r =>
       r.EvaluationResultIdentifier.EvaluationResultQualifier.ResourceId ===
       resourceId
   )[0];
-  // add tags to this resource type
-  const accountId = await getAwsAccountNumber();
+  const accountId = process.env.ACCOUNT_ID;
   const arn = getArnFromResourceId(
     resourceId,
     resource.EvaluationResultIdentifier.EvaluationResultQualifier.ResourceType,
     accountId
   );
   const tagResult = await addTags(arn, Tags);
-  console.log(tagResult);
-
-  // build and send email
   const debugInfo = getPrintInfo(arn, Tags, resource, tagResult);
   await sendEmail(debugInfo, resource);
-  console.log("Emailing information: ", debugInfo);
   const response = {
     statusCode: 200,
     body: debugInfo
@@ -70,28 +44,24 @@ async function addTags(arn, Tags) {
 }
 
 async function addEc2Tags(arn, Tags) {
-  const resource = arn.split(":")[5];
   const params = {
-    Resources: [resource],
+    Resources: [arn.split(":")[5]],
     Tags
   };
   return ec2.createTags(params).promise();
 }
 
 async function addRdsTags(arn, Tags) {
-  const resource = arn;
   const params = {
-    ResourceName: resource,
+    ResourceName: arn,
     Tags
   };
   return rds.addTagsToResource(params).promise();
 }
 
-async function addS3Tags(arn, Tags) {
-  const Bucket = arn.split(":")[5];
+async function addS3Tags(Bucket, Tags) {
   const result = await s3.getBucketTagging({ Bucket }).promise();
-  const existingTags = result.TagSet;
-  const TagSet = existingTags.concat(Tags);
+  const TagSet = result.TagSet.concat(Tags);
   const params = {
     Bucket,
     Tagging: {
@@ -103,7 +73,7 @@ async function addS3Tags(arn, Tags) {
 
 async function getComplianceDetails() {
   var params = {
-    ConfigRuleName: "required-tags",
+    ConfigRuleName: process.env.CONFIG_RULE_NAME,
     ComplianceTypes: ["NON_COMPLIANT"],
     Limit: 100
   };
@@ -114,43 +84,33 @@ async function getComplianceDetails() {
 }
 
 function getArnFromResourceId(resourceId, resourceType, accountId) {
-  //arn:partition:service:region:account-id:resource-id
-  // arn:aws:s3:::test2-publics3bucketpublics3bucketarc319353cadee-e01oko9wi55b
-  // arn:aws:s3:::test2-publics3bucketpublics3bucketarc319353cadee-e01oko9wi55b
-  let region, service;
-  let resourceTypeAbbreviation = ":";
+  let region = process.env.AWS_REGION;
+  let service = resourceType.split("::")[1].toLowerCase();
+  let abbr = ":";
   if (
     resourceType === "AWS::S3::Bucket" ||
     resourceType.indexOf("AWS::IAM") > -1
   ) {
     region = "";
-  } else {
-    region = process.env.AWS_REGION;
   }
   if (resourceType.indexOf("AWS::RDS::") > -1) {
     const subType = resourceType.split("::")[2];
-    if (subType === "DBSubnetGroup") resourceTypeAbbreviation += "subgrp:";
-    if (subType === "DBSecurityGroup") resourceTypeAbbreviation += "secgrp:";
-    if (subType === "DBCluster") resourceTypeAbbreviation += "cluster:";
+    if (subType === "DBSubnetGroup") abbr += "subgrp:";
+    if (subType === "DBSecurityGroup") abbr += "secgrp:";
+    if (subType === "DBCluster") abbr += "cluster:";
   }
-
   if (resourceType === "AWS::S3::Bucket") {
     accountId = "";
   }
-
-  service = resourceType.split("::")[1].toLowerCase();
-
-  let str = `arn:aws:${service}:${region}:${accountId}${resourceTypeAbbreviation}${resourceId}`;
-
+  let str = `arn:aws:${service}:${region}:${accountId}${abbr}${resourceId}`;
   console.log("Assembled ARN: ", str);
   return str;
 }
 
 function getPrintInfo(arn, tags, resource, result) {
-  return `You're getting this notification because resources in your account are missing required tags.
+  return `Resources in your account are missing required tags.
 
 Auto Remediation Result:\t ${result}
-
 Rule:\t ${
     resource.EvaluationResultIdentifier.EvaluationResultQualifier.ConfigRuleName
   }
@@ -168,24 +128,12 @@ async function sendEmail(text, resource) {
       "Resource missing required tags (" +
       resource.EvaluationResultIdentifier.EvaluationResultQualifier
         .ResourceType +
-      ")", // process.env.EMAIL_SUBJECT,
+      ")",
     Message: text,
-    TopicArn: "arn:aws:sns:eu-central-1:104970586768:email" // process.env.NOTIFICATION_TOPIC_ARN
+    TopicArn: process.env.NOTIFICATION_TOPIC_ARN
   };
-
-  // Create promise and SNS service object
   const publishTextPromise = new AWS.SNS({ apiVersion: "2010-03-31" })
     .publish(params)
     .promise();
   return publishTextPromise;
-}
-
-async function getAwsAccountNumber() {
-  const data = await sts.getCallerIdentity({}).promise();
-  console.log("Account information: ", data);
-  return data.Account;
-}
-
-function getRecordIdsFromSnsMessage(record) {
-  return record.Sns.Message;
 }

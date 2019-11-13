@@ -86,6 +86,42 @@ Resources:
                   Action: ["config:ListDiscoveredResources", "iam:GetPolicy", "iam:ListEntitiesForPolicy"]
                   Resource: "*"
 
+    RequiredTagsLambdaExecutionRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: 2012-10-17
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        ManagedPolicyArns:
+          - 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
+        Policies:
+          -
+            PolicyName: "AllowSNSPublish"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: "Allow"
+                  Action: "sns:Publish"
+                  Resource: !Sub "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${AWS::AccountId}-custom-remediation-topic"
+          -
+            PolicyName: "AllowTagging"
+            PolicyDocument:
+                Version: "2012-10-17"
+                Statement:
+                - Effect: "Allow"
+                  Action: ["s3:getBucketTagging", "s3:putBucketTagging", "ec2:createTags", "rds:addTagsToResource", "config:GetComplianceDetailsByConfigRule"]
+                  Resource: "*"
+    
+    RequiredTagsRemediationSNSTopic:
+      Type: 'AWS::SNS::Topic'
+      Properties:
+        TopicName: !Sub "${AWS::AccountId}-required-tags-remediation-topic"
+
     IAMRemediationSNSTopic:
       Type: 'AWS::SNS::Topic'
       Properties:
@@ -119,6 +155,23 @@ Resources:
             FunctionName: !Ref IAMRemediationLambdaFunction
             Principal: sns.amazonaws.com
             SourceArn: !Sub "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${AWS::AccountId}-iam-remediation-topic"
+    
+    RequiredTagsSNSInvokeLambdaPermission:
+      Type: AWS::Lambda::Permission
+      Properties:
+          Action: lambda:InvokeFunction
+          FunctionName: !Ref RequiredTagsRemediationFunction
+          Principal: sns.amazonaws.com
+          SourceArn: !Sub "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${AWS::AccountId}-required-tags-remediation-topic"
+
+    IAMRemediationLambdaFunctionSubscription:
+        Type: 'AWS::SNS::Subscription'
+        Properties:
+            Endpoint: !GetAtt RequiredTagsRemediationFunction.Arn
+            Protocol: lambda
+            TopicArn: !Ref RequiredTagsRemediationSNSTopic
+        DependsOn:
+            - RequiredTagsRemediationFunction
 
     IAMRemediationLambdaFunctionSubscription:
         Type: 'AWS::SNS::Subscription'
@@ -137,6 +190,167 @@ Resources:
             TopicArn: !Ref MFARemediationSNSTopic
         DependsOn:
             - MFARemediationFunction
+
+    RequiredTagsRemediationFunction:
+      Type: AWS::Lambda::Function
+      Properties:
+        Code:
+          ZipFile: |
+            const AWS = require("aws-sdk");
+            const configService = new AWS.ConfigService();
+            const s3 = new AWS.S3();
+            const ec2 = new AWS.EC2();
+            const rds = new AWS.RDS();
+            const Tags = [ { Key: "CostCenterValue", Value: process.env.CostCenterValue }, { Key: "Workload", Value: process.env.Workload }, { Key: "Owner", Value: process.env.Owner } ];
+            exports.handler = async event => {
+              console.log("EVENT\n" + JSON.stringify(event, null, 2));
+              const resourceId = event.Records.map(e => e.Sns.Message)[0];
+              const resources = await getComplianceDetails();
+              const resource = resources.filter(
+                r =>
+                  r.EvaluationResultIdentifier.EvaluationResultQualifier.ResourceId ===
+                  resourceId
+              )[0];
+              const accountId = process.env.ACCOUNT_ID;
+              const arn = getArnFromResourceId(
+                resourceId,
+                resource.EvaluationResultIdentifier.EvaluationResultQualifier.ResourceType,
+                accountId
+              );
+              const tagResult = await addTags(arn, Tags);
+              const debugInfo = getPrintInfo(arn, Tags, resource, tagResult);
+              await sendEmail(debugInfo, resource);
+              const response = {
+                statusCode: 200,
+                body: debugInfo
+              };
+              return response;
+            };
+            
+            async function addTags(arn, Tags) {
+              const result = "Required tags added to " + arn;
+              if (arn.indexOf("s3") > -1) {
+                await addS3Tags(arn, Tags);
+              } else if (arn.indexOf("ec2") > -1) {
+                await addEc2Tags(arn, Tags);
+              } else if (arn.indexOf("rds") > -1) {
+                await addRdsTags(arn, Tags);
+              } else {
+                result = "Auto tag implementation for ARN " + arn + " not implemented.";
+              }
+              return result;
+            }
+            
+            async function addEc2Tags(arn, Tags) {
+              const params = {
+                Resources: [arn.split(":")[5]],
+                Tags
+              };
+              return ec2.createTags(params).promise();
+            }
+            
+            async function addRdsTags(arn, Tags) {
+              const params = {
+                ResourceName: arn,
+                Tags
+              };
+              return rds.addTagsToResource(params).promise();
+            }
+            
+            async function addS3Tags(Bucket, Tags) {
+              const result = await s3.getBucketTagging({ Bucket }).promise();
+              const TagSet = result.TagSet.concat(Tags);
+              const params = {
+                Bucket,
+                Tagging: {
+                  TagSet
+                }
+              };
+              return s3.putBucketTagging(params).promise();
+            }
+            
+            async function getComplianceDetails() {
+              var params = {
+                ConfigRuleName: process.env.CONFIG_RULE_NAME,
+                ComplianceTypes: ["NON_COMPLIANT"],
+                Limit: 100
+              };
+              const promise = await configService
+                .getComplianceDetailsByConfigRule(params)
+                .promise();
+              return promise.EvaluationResults;
+            }
+            
+            function getArnFromResourceId(resourceId, resourceType, accountId) {
+              let region = process.env.AWS_REGION;
+              let service = resourceType.split("::")[1].toLowerCase();
+              let abbr = ":";
+              if (
+                resourceType === "AWS::S3::Bucket" ||
+                resourceType.indexOf("AWS::IAM") > -1
+              ) {
+                region = "";
+              }
+              if (resourceType.indexOf("AWS::RDS::") > -1) {
+                const subType = resourceType.split("::")[2];
+                if (subType === "DBSubnetGroup") abbr += "subgrp:";
+                if (subType === "DBSecurityGroup") abbr += "secgrp:";
+                if (subType === "DBCluster") abbr += "cluster:";
+              }
+              if (resourceType === "AWS::S3::Bucket") {
+                accountId = "";
+              }
+              let str = `arn:aws:${service}:${region}:${accountId}${abbr}${resourceId}`;
+              console.log("Assembled ARN: ", str);
+              return str;
+            }
+            
+            function getPrintInfo(arn, tags, resource, result) {
+              return `Resources in your account are missing required tags.
+            
+            Auto Remediation Result:\t ${result}
+            Rule:\t ${
+                resource.EvaluationResultIdentifier.EvaluationResultQualifier.ConfigRuleName
+              }
+            Resource Type:\t ${
+                resource.EvaluationResultIdentifier.EvaluationResultQualifier.ResourceType
+              }
+            Arn:\t ${arn}
+            Tags:\t ${JSON.stringify(tags)}
+                `;
+            }
+            
+            async function sendEmail(text, resource) {
+              var params = {
+                Subject:
+                  "Resource missing required tags (" +
+                  resource.EvaluationResultIdentifier.EvaluationResultQualifier
+                    .ResourceType +
+                  ")",
+                Message: text,
+                TopicArn: process.env.NOTIFICATION_TOPIC_ARN
+              };
+              const publishTextPromise = new AWS.SNS({ apiVersion: "2010-03-31" })
+                .publish(params)
+                .promise();
+              return publishTextPromise;
+            }
+          
+          
+        Description: ARC319 Lambda Remediation for overly permissive IAM policies
+        Handler: index.handler
+        MemorySize: 128
+        Environment:
+          Variables:
+            NOTIFICATION_TOPIC_ARN: !Ref CustomRemediationEmailTopic
+            ACCOUNT_ID: !Sub "${AWS::AccountId}"
+            CONFIG_RULE_NAME: !Sub "REQUIRED_TAGS_${AWS::StackName}"
+            CostCenterValue: !Ref TagCostCenterValue
+            Workload: !Ref TagWorkloadValue
+            Owner: !Ref TagOwnerValue
+        Role: !GetAtt RequiredTagsLambdaExecutionRole.Arn
+        Runtime: nodejs8.10
+        Timeout: 10
 
     IAMRemediationLambdaFunction:
       Type: AWS::Lambda::Function
@@ -353,7 +567,7 @@ Resources:
       Type: AWS::Config::ConfigRule
       Properties:
         Description: 'Checks whether Amazon Elastic Compute Cloud (Amazon EC2) instances have a public IP association. The rule is NON_COMPLIANT if the publicIp field is present in the Amazon EC2 instance configuration item. This rule applies only to IPv4.'
-        ConfigRuleName: EC2_INSTANCE_NO_PUBLIC_IP
+        ConfigRuleName: !Sub "EC2_INSTANCE_NO_PUBLIC_IP_${AWS::StackName}"
         Scope:
           ComplianceResourceTypes:
             - 'AWS::EC2::Instance'
@@ -364,7 +578,7 @@ Resources:
       Type: AWS::Config::ConfigRule
       Properties:
         Description: 'Checks that your Amazon S3 buckets do not allow public read access. The rule checks the Block Public Access settings, the bucket policy, and the bucket access control list (ACL).'
-        ConfigRuleName: S3_BUCKET_PUBLIC_READ_PROHIBITED
+        ConfigRuleName: !Sub "S3_BUCKET_PUBLIC_READ_PROHIBITED_${AWS::StackName}"
         MaximumExecutionFrequency: One_Hour
         Scope:
           ComplianceResourceTypes:
@@ -376,7 +590,7 @@ Resources:
       Type: AWS::Config::ConfigRule
       Properties:
         Description: 'Checks whether the Amazon Relational Database Service (RDS) instances are not publicly accessible. The rule is non-compliant if the publiclyAccessible field is true in the instance configuration item.'
-        ConfigRuleName: RDS_INSTANCE_PUBLIC_ACCESS_CHECK
+        ConfigRuleName: !Sub "RDS_INSTANCE_PUBLIC_ACCESS_CHECK_${AWS::StackName}"
         Scope:
           ComplianceResourceTypes:
             - 'AWS::RDS::DBInstance'
@@ -387,7 +601,7 @@ Resources:
       Type: AWS::Config::ConfigRule
       Properties:
         Description: 'Checks whether the default version of AWS Identity and Access Management (IAM) policies do not have administrator access. If any statement has \"Effect\": \"Allow\" with \"Action\": \"*\" over \"Resource\": \"*\", the rule is non-compliant.'
-        ConfigRuleName: IAM_POLICY_NO_STATEMENTS_WITH_ADMIN_ACCESS
+        ConfigRuleName: !Sub "IAM_POLICY_NO_STATEMENTS_WITH_ADMIN_ACCESS_${AWS::StackName}"
         Scope:
           ComplianceResourceTypes:
             - 'AWS::IAM::Policy'
@@ -398,7 +612,7 @@ Resources:
       Type: AWS::Config::ConfigRule
       Properties:
         Description: 'Checks whether security groups that are in use disallow unrestricted incoming SSH traffic.'
-        ConfigRuleName: INCOMING_SSH_DISABLED
+        ConfigRuleName: !Sub "INCOMING_SSH_DISABLED_${AWS::StackName}"
         Scope:
           ComplianceResourceTypes:
             - 'AWS::EC2::SecurityGroup'
@@ -416,7 +630,7 @@ Resources:
           tag2Value: !Ref TagWorkloadValue
           tag3Key: Owner
           tag3Value: !Ref TagOwnerValue
-        ConfigRuleName: REQUIRED_TAGS
+        ConfigRuleName: !Sub "REQUIRED_TAGS_${AWS::StackName}"
         Scope:
           ComplianceResourceTypes:
             - 'AWS::EC2::Instance'
@@ -429,7 +643,7 @@ Resources:
       Type: AWS::Config::ConfigRule
       Properties:
         Description: 'Checks whether your IAM users have multi factor authentication turned on'
-        ConfigRuleName: IAM_USER_MFA_ENABLED
+        ConfigRuleName: !Sub "IAM_USER_MFA_ENABLED_${AWS::StackName}"
         Scope:
           ComplianceResourceTypes:
             - 'AWS::IAM::User'
@@ -490,7 +704,7 @@ Resources:
           Automatic: 'true'
           MaximumAutomaticAttempts: '5'
           RetryAttemptSeconds: '60'
-          ConfigRuleName: EC2_INSTANCE_NO_PUBLIC_IP
+          ConfigRuleName: !Sub "EC2_INSTANCE_NO_PUBLIC_IP_${AWS::StackName}"
           Parameters:
               AutomationAssumeRole:
                   StaticValue:
@@ -508,7 +722,7 @@ Resources:
           Automatic: 'true'
           MaximumAutomaticAttempts: '5'
           RetryAttemptSeconds: '60'
-          ConfigRuleName: S3_BUCKET_PUBLIC_READ_PROHIBITED
+          ConfigRuleName: !Sub "S3_BUCKET_PUBLIC_READ_PROHIBITED_${AWS::StackName}"
           Parameters:
               AutomationAssumeRole:
                   StaticValue:
@@ -526,7 +740,7 @@ Resources:
     #       Automatic: 'true'
     #       MaximumAutomaticAttempts: '5'
     #       RetryAttemptSeconds: '60'
-    #       ConfigRuleName: RDS_INSTANCE_PUBLIC_ACCESS_CHECK
+    #       ConfigRuleName: !Sub "RDS_INSTANCE_PUBLIC_ACCESS_CHECK_${AWS::StackName}"
     #       Parameters:
     #           AutomationAssumeRole:
     #               StaticValue:
@@ -544,7 +758,7 @@ Resources:
           Automatic: 'true'
           MaximumAutomaticAttempts: '5'
           RetryAttemptSeconds: '60'
-          ConfigRuleName: IAM_POLICY_NO_STATEMENTS_WITH_ADMIN_ACCESS
+          ConfigRuleName: !Sub "IAM_POLICY_NO_STATEMENTS_WITH_ADMIN_ACCESS_${AWS::StackName}"
           Parameters:
               AutomationAssumeRole:
                   StaticValue:
@@ -566,7 +780,7 @@ Resources:
           Automatic: 'true'
           MaximumAutomaticAttempts: '5'
           RetryAttemptSeconds: '60'
-          ConfigRuleName: IAM_USER_MFA_ENABLED
+          ConfigRuleName: !Sub "IAM_USER_MFA_ENABLED_${AWS::StackName}"
           Parameters:
               AutomationAssumeRole:
                   StaticValue:
@@ -582,6 +796,28 @@ Resources:
           TargetId: 'AWS-PublishSNSNotification'
           TargetType: 'SSM_DOCUMENT'
           TargetVersion: '1'
+    ConfigRule6Remediation:
+      Type: 'AWS::Config::RemediationConfiguration'
+      Properties:
+        Automatic: 'true'
+        MaximumAutomaticAttempts: '5'
+        RetryAttemptSeconds: '60'
+        ConfigRuleName: !Sub "REQUIRED_TAGS_${AWS::StackName}"
+        Parameters:
+            AutomationAssumeRole:
+                StaticValue:
+                  Values:
+                    - Fn::GetAtt: AutoRemediationRole.Arn
+            Message:
+                ResourceValue:
+                  Value: 'RESOURCE_ID'
+            TopicArn:
+                StaticValue:
+                  Values:
+                    - Ref: RequiredTagsRemediationSNSTopic
+        TargetId: 'AWS-PublishSNSNotification'
+        TargetType: 'SSM_DOCUMENT'
+        TargetVersion: '1'
 Outputs:
   IAMRoleArn:
     Description: IAM Role used for automated Remediation
