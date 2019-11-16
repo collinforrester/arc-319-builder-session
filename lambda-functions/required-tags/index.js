@@ -3,7 +3,11 @@ const configService = new AWS.ConfigService();
 const s3 = new AWS.S3();
 const ec2 = new AWS.EC2();
 const rds = new AWS.RDS();
-const Tags = [ { Key: "CostCenterValue", Value: process.env.CostCenterValue }, { Key: "Workload", Value: process.env.Workload }, { Key: "Owner", Value: process.env.Owner } ];
+const Tags = [
+  { Key: "CostCenter", Value: process.env.CostCenter },
+  { Key: "Workload", Value: process.env.Workload },
+  { Key: "Owner", Value: process.env.Owner }
+];
 exports.handler = async event => {
   console.log("EVENT\n" + JSON.stringify(event, null, 2));
   const resourceId = event.Records.map(e => e.Sns.Message)[0];
@@ -109,17 +113,19 @@ function getArnFromResourceId(resourceId, resourceType, accountId) {
 
 function getPrintInfo(arn, tags, resource, result) {
   return `Resources in your account are missing required tags.
-
-Auto Remediation Result:\t ${result}
-Rule:\t ${
-    resource.EvaluationResultIdentifier.EvaluationResultQualifier.ConfigRuleName
-  }
-Resource Type:\t ${
-    resource.EvaluationResultIdentifier.EvaluationResultQualifier.ResourceType
-  }
-Arn:\t ${arn}
-Tags:\t ${JSON.stringify(tags)}
-    `;
+            
+            Auto Remediation Result:\t ${result}
+            Rule:\t ${
+              resource.EvaluationResultIdentifier.EvaluationResultQualifier
+                .ConfigRuleName
+            }
+            Resource Type:\t ${
+              resource.EvaluationResultIdentifier.EvaluationResultQualifier
+                .ResourceType
+            }
+            Arn:\t ${arn}
+            Tags:\t ${JSON.stringify(tags)}
+                `;
 }
 
 async function sendEmail(text, resource) {

@@ -1,9 +1,4 @@
 Parameters:
-    MyIPAddress:
-      Type: String
-      Default: 'Enter Current IP'
-      MinLength: 1
-      ConstraintDescription: 'IP address of current workstation to allow for ingress SSH access'
     MyEmailAddress:
       Type: String
       Default: 'Enter Valid Email address'
