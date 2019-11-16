@@ -191,6 +191,15 @@ Resources:
         DependsOn:
             - MFARemediationFunction
 
+    TagsRemediationLambdaFunctionSubscription:
+      Type: 'AWS::SNS::Subscription'
+      Properties:
+          Endpoint: !GetAtt RequiredTagsRemediationFunction.Arn
+          Protocol: lambda
+          TopicArn: !Ref RequiredTagsRemediationSNSTopic
+      DependsOn:
+          - RequiredTagsRemediationFunction
+
     RequiredTagsRemediationFunction:
       Type: AWS::Lambda::Function
       Properties:
@@ -201,7 +210,7 @@ Resources:
             const s3 = new AWS.S3();
             const ec2 = new AWS.EC2();
             const rds = new AWS.RDS();
-            const Tags = [ { Key: "CostCenterValue", Value: process.env.CostCenterValue }, { Key: "Workload", Value: process.env.Workload }, { Key: "Owner", Value: process.env.Owner } ];
+            const Tags = [ { Key: "CostCenter", Value: process.env.CostCenter }, { Key: "Workload", Value: process.env.Workload }, { Key: "Owner", Value: process.env.Owner } ];
             exports.handler = async event => {
               console.log("EVENT\n" + JSON.stringify(event, null, 2));
               const resourceId = event.Records.map(e => e.Sns.Message)[0];
@@ -345,7 +354,7 @@ Resources:
             NOTIFICATION_TOPIC_ARN: !Ref CustomRemediationEmailTopic
             ACCOUNT_ID: !Sub "${AWS::AccountId}"
             CONFIG_RULE_NAME: !Sub "REQUIRED_TAGS_${AWS::StackName}"
-            CostCenterValue: !Ref TagCostCenterValue
+            CostCenter: !Ref TagCostCenterValue
             Workload: !Ref TagWorkloadValue
             Owner: !Ref TagOwnerValue
         Role: !GetAtt RequiredTagsLambdaExecutionRole.Arn
@@ -634,7 +643,7 @@ Resources:
         Scope:
           ComplianceResourceTypes:
             - 'AWS::EC2::Instance'
-            - 'AWS::RDS::DBInstance'
+            - 'AWS::RDS::DBCluster'
             - 'AWS::EC2::SecurityGroup'
         Source:
           Owner: AWS
@@ -734,24 +743,7 @@ Resources:
           TargetId: 'AWS-DisableS3BucketPublicReadWrite'
           TargetType: 'SSM_DOCUMENT'
           TargetVersion: '1'
-    # ConfigRule3Remediation:
-    #     Type: 'AWS::Config::RemediationConfiguration'
-    #     Properties:
-    #       Automatic: 'true'
-    #       MaximumAutomaticAttempts: '5'
-    #       RetryAttemptSeconds: '60'
-    #       ConfigRuleName: !Sub "RDS_INSTANCE_PUBLIC_ACCESS_CHECK_${AWS::StackName}"
-    #       Parameters:
-    #           AutomationAssumeRole:
-    #               StaticValue:
-    #                 Values:
-    #                   - Fn::GetAtt: AutoRemediationRole.Arn
-    #           InstanceId:
-    #               ResourceValue:
-    #                 Value: 'RESOURCE_ID'
-    #       TargetId: 'AWS-StopRdsInstance'
-    #       TargetType: 'SSM_DOCUMENT'
-    #       TargetVersion: '1'
+
     ConfigRule4Remediation:
         Type: 'AWS::Config::RemediationConfiguration'
         Properties:
