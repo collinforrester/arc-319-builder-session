@@ -640,6 +640,7 @@ Resources:
             - 'AWS::EC2::Instance'
             - 'AWS::RDS::DBCluster'
             - 'AWS::EC2::SecurityGroup'
+            - 'AWS::S3::Bucket'
         Source:
           Owner: AWS
           SourceIdentifier: REQUIRED_TAGS
