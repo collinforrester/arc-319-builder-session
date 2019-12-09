@@ -5,6 +5,6 @@ In this session, learn how to monitor, alert, and remediate security events in y
 Materials in this lab **CREATE** security vulnerabilities for **DEMONSTRATION PURPOSES** within the account they're deployed in.  Please **DO NOT** deploy these materials within an AWS account with sensitive workloads, customer data, or anywhere near anything that could represent a production environment.
 
 # Background
-* Each module is contains a `*-solution.yml` and a `*-vulnerability.yml` file
-* Deploy the solution file first, and the vulnerability file 2nd
-* Refer to each modules `README.md` for further details on the module in question
+* Review [./ARC319LabGuide.pdf](./ARC319LabGuide.pdf) for instructions/lab walkthrough
+* The vulnerabilities can be found in [this yaml](modules/threeTierWebApp/threeTierWebApp-vulnerability.yml)
+* The config rules that remediates the environment can be found in [Config.yaml](./Config.yaml)
